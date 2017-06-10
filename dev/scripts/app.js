@@ -6,6 +6,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Cards from './postsCard.js';
+import firebase from './firebase.js';
 
 const config = {
   apiKey: "AIzaSyBFQkBD6HwqQt4dp8Ons8y8vlL4Ig6JsnQ",
@@ -181,7 +182,7 @@ class App extends React.Component {
 							key: key,
 							userPhoto: dbPosts[key].userPhoto,
 							userComment: dbPosts[key].userComment
-							
+
 						});
 					}
 					console.log('newPosts under onAuthChanged. array of objects',newPosts);

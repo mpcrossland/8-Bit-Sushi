@@ -1,7 +1,9 @@
 import React from 'react';
+import firebase from './firebase.js';
 
 
-// const dbRef = firebase.database().ref('/');
+const dbRef = firebase.database().ref('/');
+
 console.log(firebase)
 export default class Cards extends React.Component{
 	constructor(){
