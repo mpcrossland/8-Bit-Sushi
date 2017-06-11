@@ -8,15 +8,6 @@ import ReactDOM from 'react-dom';
 import Cards from './postsCard.js';
 import firebase from './firebase.js';
 
-const config = {
-  apiKey: "AIzaSyBFQkBD6HwqQt4dp8Ons8y8vlL4Ig6JsnQ",
-  authDomain: "photo-rating-project.firebaseapp.com",
-  databaseURL: "https://photo-rating-project.firebaseio.com",
-  projectId: "photo-rating-project",
-  storageBucket: "photo-rating-project.appspot.com",
-  messagingSenderId: "599886236917"
-};
-firebase.initializeApp(config);
 
 const auth = firebase.auth();
 const provider = new firebase.auth.GoogleAuthProvider();
@@ -38,7 +29,8 @@ class App extends React.Component {
 			userPhoto: '',
 			reply: '',
 			replies: [],
-			likes: ''
+			likes: '',
+			blogKey:''
 
 		}
 		this.handleSubmit = this.handleSubmit.bind(this);
@@ -71,7 +63,7 @@ class App extends React.Component {
 	}
 	uploadPhoto(e) {
 		let file = e.target.files[0];
-		console.log('FILE-NAME in upload photo cmpnt. - ',file.name);
+		// console.log('FILE-NAME in upload photo cmpnt. - ',file.name);
 		const storageRef = firebase.storage().ref('userPhotos/' + file.name)
 		const task = storageRef.put(file).then(() => {
 			const urlObject = storageRef.getDownloadURL().then((data) => {
@@ -102,58 +94,63 @@ class App extends React.Component {
 	}
 
 	render(){
+		// console.log('first state', this.state)
 		const showProperMenu = () => {
 			if (this.state.loggedIn === true) {
 				return(
-					<div className="nav">
-					<img className="logo" src='./images/logo.png' />
-						<ul>
-							<li><search /></li>
-							<li><button onClick={this.logout}>Log-Out</button></li>
-							<li>Contact</li>
-							<li>Home</li>
-						</ul>
-						<p>You are Logged-In as {this.state.user.displayName} </p> 
-						<img className="avatar" src={this.state.user.photoURL} />
+					<div className="day">
+						<header>
+							<div className="nav">
+								<img className="logo" src='./images/sush.png' />
+								<ul>
+									<li><search /></li>
+									<li><button onClick={this.logout}>Log-Out</button></li>
+									<li>Contact</li>
+									<li>Home</li>
+								</ul>
+								<p>You are Logged-In as {this.state.user.displayName} </p> 
+								<img className="avatar" src={this.state.user.photoURL} />
+							</div>
+						</header>
+						<div className="uploadModal">
+							<div className="modalContainer">
+								<div className="doggyDiv">
+									<img className="dog" src='/images/dog.gif' />
+								</div>
+								<form onSubmit={this.handleSubmit} className="postSubmit">
+									<div className="userForm">
+										<input type="file" name="userPhoto" className="chooseFile" accept="image/*" onChange={this.uploadPhoto} />
+
+										<textarea name="userComment" className="userComment" type="text" value={this.state.userComment} placeholder="Comment" onChange={this.handleChange}>
+										</textarea>
+										<input type="submit" className="post post1" value="Submit" />
+									</div>
+								</form>
+							</div>
+						</div>
 					</div>
 				)
 			}else{
 				return(
-					<div className="nav">
-						<img className="logo" src='./images/logo.png' />
-						<ul>
-							<li><search /></li>
-							<li><button onClick={this.login}>Log-In</button></li>
-							<li>Contact</li>
-							<li>Home</li>
-						</ul>
+					<div className="night">
+							<div className="modal">
+								<img className="logo" src='./images/sush.png' />
+								<button onClick={this.login}>Log-In</button>
+							<div className="signIn">
+							<h1>You are not signed in!!!</h1>
+							</div>
+						</div>
 					</div>
 				)
 			}
 		}
 		return(
-			<div className="divDaddy">
-				<header>
+			<div className="day">
 					{showProperMenu()}
-				</header>
-				<div className="userForm">
-					<img className="logo" src='./images/dog.gif' />
-					<form onSubmit={this.handleSubmit} className="postSubmit">
-
-						<label htmlFor="photo">Upload a Photo</label>
-						<input type="file" name="userPhoto" accept="image/*" onChange={this.uploadPhoto} />
-
-						<label htmlFor="userComment">Comment</label>
-						<textarea name="userComment" className="userComment" type="text" placeholder="Comment" onChange={this.handleChange}>
-						</textarea>
-						<input type="submit" value="Post" />
-					</form>
-				</div>
-
 				<section className="cards"> 
 					{this.state.posts.map((post, i) => {
 						if (post.userComment) {
-							return <Cards comment={post.userComment} photo={post.userPhoto} displayName={this.state.user.displayName} photoURL={this.state.user.photoURL} />
+							return <Cards user={this.state.user} comment={post.userComment} blogKey={this.state.blogKey} photo={post.userPhoto} displayName={this.state.user.displayName} photoURL={this.state.user.photoURL} />
 						} else {
 							// console.log(this.state.user.displayName);
 							// console.log('photo', post.userComment)
@@ -165,7 +162,6 @@ class App extends React.Component {
 	}
 	componentDidMount(){
 		auth.onAuthStateChanged((user) => {
-			console.log('USER in onAuthStateChanged', user);
 			if(user){
 				this.setState({
 					user : user,
@@ -185,16 +181,12 @@ class App extends React.Component {
 
 						});
 					}
-					console.log('newPosts under onAuthChanged. array of objects',newPosts);
-
+					const blogKey = newPosts[0].key;
 					this.setState({
-						posts: newPosts
+						posts: newPosts,
+						blogKey: blogKey
 					});
 				});
-				// console.log('posts', this.state.posts)
-
-
-
 			}else{
 				this.setState({
 					loggedIn: false,
@@ -204,15 +196,6 @@ class App extends React.Component {
 		})
 	}
 }	
-
-
-
-
-
-
-
-
-
 
 
 ReactDOM.render(<App />, document.getElementById('app'));
