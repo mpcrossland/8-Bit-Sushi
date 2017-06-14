@@ -30,6 +30,7 @@ class App extends React.Component {
 			reply: '',
 			replies: [],
 			likes: '',
+			toggleModal: true,
 			blogKey:''
 
 		}
@@ -38,6 +39,7 @@ class App extends React.Component {
 		this.logout = this.logout.bind(this);
 		this.handleChange = this.handleChange.bind(this);
 		this.uploadPhoto = this.uploadPhoto.bind(this);
+		this.toggleModal = this.toggleModal.bind(this);
 	}
 	handleSubmit(e) {
 		if(this.userPhoto === ''){
@@ -49,8 +51,15 @@ class App extends React.Component {
 		const post = {
 			userPhoto: this.state.userPhoto,
 			userComment: this.state.userComment,
+			googleName: this.state.user.displayName,
+			googleAvatar: this.state.user.photoURL
 		};
-		dbRef.push(post);
+		console.log(post);
+		const userId = this.state.user.uid;
+		const userRef = firebase.database().ref();
+
+		userRef.push(post);
+
 		this.setState({
 			userPhoto:'',
 			userComment:''              //This resets the state back to empty, so fucking cool!
@@ -75,6 +84,7 @@ class App extends React.Component {
 		auth.signInWithPopup(provider)
 			.then((result) =>{
 				const user = result.user;
+				// console.log("user", user);
 				this.setState({
 					user: user,
 					loggedIn: true,
@@ -88,56 +98,67 @@ class App extends React.Component {
 			.then(() => {
 				this.setState({
 					user: null,
-					loggedIn: false
+					loggedIn: false,
+					posts: []
 				})
 			});
 	}
-
+	toggleModal() {
+		this.setState({
+			toggleModal: !this.state.toggleModal
+		})
+	}
 	render(){
-		// console.log('first state', this.state)
+		console.log('first post', this.state)
 		const showProperMenu = () => {
 			if (this.state.loggedIn === true) {
 				return(
 					<div className="day">
 						<header>
 							<div className="nav">
-								<img className="logo" src='./images/sush.png' />
-								<ul>
-									<li><search /></li>
-									<li><button onClick={this.logout}>Log-Out</button></li>
-									<li>Contact</li>
-									<li>Home</li>
+								<div className="sushiLogo">
+									<img className="logo" src='./images/sush.png' />
+								</div>
+								<div className="welcomeContainer">
+									<div className="sushi">WELCOME TO 8-BIT SUSHI</div>
+								</div>
+								<ul className="loggingInAs">
+									<li className="name">You are Logged-In as <em>{this.state.user.displayName}</em></li>
+									<li><img className="loggedInUserAvatar"src={this.state.user.photoURL} /> </li>
 								</ul>
-								<p>You are Logged-In as {this.state.user.displayName} </p> 
-								<img className="avatar" src={this.state.user.photoURL} />
+								<ul>
+									<li><button className="uploadButton" onClick={this.toggleModal}>Upload a Photo</button></li>
+									<li><button className="logOut" onClick={this.logout}>Log-Out</button></li>
+ 								</ul>
 							</div>
 						</header>
-						<div className="uploadModal">
-							<div className="modalContainer">
-								<div className="doggyDiv">
-									<img className="dog" src='/images/dog.gif' />
-								</div>
-								<form onSubmit={this.handleSubmit} className="postSubmit">
-									<div className="userForm">
-										<input type="file" name="userPhoto" className="chooseFile" accept="image/*" onChange={this.uploadPhoto} />
-
-										<textarea name="userComment" className="userComment" type="text" value={this.state.userComment} placeholder="Comment" onChange={this.handleChange}>
-										</textarea>
-										<input type="submit" className="post post1" value="Submit" />
-									</div>
-								</form>
+						<div className={`modalContainer ${this.state.toggleModal ? 'show' : 'hide'}`} ref={ref => this.modalContainer = ref}>
+							<button onClick={this.toggleModal}><i className="fa fa-times fa-lg"></i></button>
+							<p><strong>Upload your photo</strong></p>
+							<div className="doggyDiv">
+								<img className="dog" src='/images/dog.gif' />
 							</div>
+							<form onSubmit={this.handleSubmit} className="postSubmit">
+								<div className="userForm">
+									<input type="file" name="userPhoto" label="chooseFile" accept="image/*" onChange={this.uploadPhoto} />
+
+									<textarea name="userComment" className="userComment" type="text" value={this.state.userComment} placeholder="Comment" onChange={this.handleChange}>
+									</textarea>
+									<input type="submit" className="post post1" value="Submit" />
+								</div>
+							</form>
 						</div>
 					</div>
 				)
 			}else{
 				return(
 					<div className="night">
-							<div className="modal">
-								<img className="logo" src='./images/sush.png' />
-								<button onClick={this.login}>Log-In</button>
+						<div className="modal">
+							<p className="welcome">WELCOME TO</p>
+							<p className="sushi">8-BIT SUSHI</p>
+							<img src="/images/1-bmyBSn5CFSsWs9r4jQ7RnQ.png" />
 							<div className="signIn">
-							<h1>You are not signed in!!!</h1>
+								<button className="signIn" onClick={this.login}>Sign in with Google</button>
 							</div>
 						</div>
 					</div>
@@ -149,43 +170,60 @@ class App extends React.Component {
 					{showProperMenu()}
 				<section className="cards"> 
 					{this.state.posts.map((post, i) => {
+
 						if (post.userComment) {
-							return <Cards user={this.state.user} comment={post.userComment} blogKey={this.state.blogKey} photo={post.userPhoto} displayName={this.state.user.displayName} photoURL={this.state.user.photoURL} />
+							// console.log(post);
+							return <Cards user={this.state.user}
+							blogKey={post.key}
+							userId={post.userId}
+							photo={post.photoURL}
+							comment={post.userComment} 
+							googleAvatar={post.googleAvatar}
+							googleName={post.googleName} 
+							 
+							/>
 						} else {
 							// console.log(this.state.user.displayName);
 							// console.log('photo', post.userComment)
 						}
-					})}
+					}).reverse()}
 				</section>
 			</div>
 		)
 	}
 	componentDidMount(){
 		auth.onAuthStateChanged((user) => {
+			// console.log('USER',user)
 			if(user){
 				this.setState({
 					user : user,
 					loggedIn: true
 				})
 				const userId = user.uid;
-				// const userRef = firebase.database().ref('/');
+				const userRef = firebase.database().ref();
+				// console.log("user logged in", userId)
+				// console.log(userRef, userRef[userId]);
 
-				dbRef.on('value', (snapshot) => {
-					const dbPosts = snapshot.val();
-					const newPosts = [];
-					for (let key in dbPosts) {
-						newPosts.push({
+				userRef.on('value', (snapshot) => {
+					const users = snapshot.val();
+					const allPosts = [];
+					// for (let user in users) {
+					for (let key in users) {
+						const post = users[key];
+						allPosts.push({
 							key: key,
-							userPhoto: dbPosts[key].userPhoto,
-							userComment: dbPosts[key].userComment
+							userId: user,
+							googleAvatar: post.googleAvatar,
+							googleName: post.googleName,
+							userComment: post.userComment,
+							photoURL: post.userPhoto
 
 						});
 					}
-					const blogKey = newPosts[0].key;
+					// }
 					this.setState({
-						posts: newPosts,
-						blogKey: blogKey
-					});
+						posts: allPosts
+					})
 				});
 			}else{
 				this.setState({
@@ -193,6 +231,9 @@ class App extends React.Component {
 					user: null
 				})
 			}
+
+
+			
 		})
 	}
 }	
