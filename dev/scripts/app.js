@@ -41,6 +41,7 @@ class App extends React.Component {
 		this.uploadPhoto = this.uploadPhoto.bind(this);
 		this.toggleModal = this.toggleModal.bind(this);
 	}
+	 // SCREATING A POST OBJECT, PUSHING TO FIREBASE, CLEARING STATE BACK TO EMPTY
 	handleSubmit(e) {
 		if(this.userPhoto === ''){
 			alert ("You didn't submit a photo");
@@ -54,7 +55,6 @@ class App extends React.Component {
 			googleName: this.state.user.displayName,
 			googleAvatar: this.state.user.photoURL
 		};
-		console.log(post);
 		const userId = this.state.user.uid;
 		const userRef = firebase.database().ref();
 
@@ -108,6 +108,7 @@ class App extends React.Component {
 			toggleModal: !this.state.toggleModal
 		})
 	}
+	//NAV BAR AND UPLOAD MODAL -------------------
 	render(){
 		console.log('first post', this.state)
 		const showProperMenu = () => {
@@ -133,7 +134,7 @@ class App extends React.Component {
 							</div>
 						</header>
 						<div className={`modalContainer ${this.state.toggleModal ? 'show' : 'hide'}`} ref={ref => this.modalContainer = ref}>
-							<button onClick={this.toggleModal}><i className="fa fa-times fa-lg"></i></button>
+							<span onClick={this.toggleModal}><i className="fa fa-times fa-lg"></i></span>
 							<p><strong>Upload your photo</strong></p>
 							<div className="doggyDiv">
 								<img className="dog" src='/images/dog.gif' />
@@ -151,6 +152,7 @@ class App extends React.Component {
 					</div>
 				)
 			}else{
+				//WELCOME PAGE ----------------------
 				return(
 					<div className="night">
 						<div className="modal">
@@ -165,6 +167,8 @@ class App extends React.Component {
 				)
 			}
 		}
+		//TAKING THE INFORMATION WE JUST SENT TO FIREBASE (FROM HANDLE SUBMIT) AS A 'POST' OBJECT
+		//AND NOW MAKING THEM PROPS TO BE USED IN CARDS COMPONENT
 		return(
 			<div className="day">
 					{showProperMenu()}
@@ -172,7 +176,6 @@ class App extends React.Component {
 					{this.state.posts.map((post, i) => {
 
 						if (post.userComment) {
-							// console.log(post);
 							return <Cards user={this.state.user}
 							blogKey={post.key}
 							userId={post.userId}
@@ -183,8 +186,6 @@ class App extends React.Component {
 							 
 							/>
 						} else {
-							// console.log(this.state.user.displayName);
-							// console.log('photo', post.userComment)
 						}
 					}).reverse()}
 				</section>
@@ -201,13 +202,12 @@ class App extends React.Component {
 				})
 				const userId = user.uid;
 				const userRef = firebase.database().ref();
-				// console.log("user logged in", userId)
-				// console.log(userRef, userRef[userId]);
-
 				userRef.on('value', (snapshot) => {
 					const users = snapshot.val();
 					const allPosts = [];
-					// for (let user in users) {
+					// I THINK WE'RE GETTING TE KEYS AND INFOTMARION FOR EACH POST HERE BACK FROM FIREBASE, THEN
+					// MAKING THEN CREATING SHORTNANDS FOR THEM, AND PUTTING THEM IN AN OBJECT CALLED ALLPOSTS.
+					//GET AN INSTRUCTOR TO CLARIFY.
 					for (let key in users) {
 						const post = users[key];
 						allPosts.push({
@@ -220,7 +220,6 @@ class App extends React.Component {
 
 						});
 					}
-					// }
 					this.setState({
 						posts: allPosts
 					})

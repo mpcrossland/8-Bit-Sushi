@@ -49,17 +49,15 @@ export default class Cards extends React.Component{
 		});
 	}
 	render(){
-		// console.log("this.props", this.props); {/* getting photo and comments */ }
-		// console.log ('this.state', this.state); { getting reply and likes  }
-		// console.log('blahblah', this.props.displayName); 
+		// THIS IS ALL THE JSX FOR EACH CARD----  A REPLY CARD IN HERE
 		return(
 			<div className="postCard">
 				<div><img className="avatar" src={this.props.googleAvatar} /></div>
 				<div className="cardHeader"> 
 					<h2>{this.props.googleName}</h2>
 					<div> 
-						<a href=""><i className="fa fa-heart-o fa-lg"></i></a>
-						<a href=""><i className="fa fa-bookmark-o fa-lg"></i></a>
+						<i className="fa fa-heart-o fa-lg"></i>
+						<i className="fa fa-bookmark-o fa-lg"></i>
 					</div>
 				</div>
 				<div className="imgContainer">
@@ -88,6 +86,9 @@ export default class Cards extends React.Component{
 			</div>
 		)
 	}
+	//REPLIES ARE ACTING A LITTLE WEIRD WITH THE LAUNCH VERSION, MAKE SURE ALL THE 
+	//PUSHING TO FIREBASE, AND GETTING BACK ARE IN THE CORRECT LIFECYCLE. 
+	//FOR YOUR PORTFOLIO!!!
 	componentDidMount(){
 		const dbRef = firebase.database().ref(`/${this.props.blogKey}/replies`);
 		dbRef.on('value', (fbReplyData) => {
@@ -105,14 +106,9 @@ export default class Cards extends React.Component{
 			this.setState({
 				feedback: newReplies
 			});
-			// console.log(this.state)
 		});
 	}
 }
-
-//usersItem = {
-	// item: thi.state.item,
-	// name: this.state.name
 
 
 

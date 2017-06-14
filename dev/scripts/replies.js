@@ -7,7 +7,7 @@ export default function(props) {
 		<div className="replyCard">
 			<div className="reply"> 
 				<h3 className="replyName">{props.name}</h3>
-				<img className="replyPhoto" src={props.avatar} /> <div className="replyP"><p>{props.reply}</p></div> <button onClick={() => props.remove(props.index)}><i className="fa fa-times fa-lg"></i></button>
+				<img className="replyPhoto" src={props.avatar} /> <div className="replyP"><p>{props.reply}</p></div> <span onClick={() => props.remove(props.index)}><i className="fa fa-times fa-lg"></i></span>
 			</div>
 		</div>
 	)
